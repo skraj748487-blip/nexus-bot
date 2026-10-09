@@ -4,7 +4,7 @@ import yt_dlp
 import threading
 from flask import Flask
 
-# Dummy web server for Render Free Web Service
+# Render web service ko active rakhne ke liye lightweight web server
 app = Flask('')
 
 @app.route('/')
@@ -15,8 +15,8 @@ def run_flask():
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
-# Telegram Bot Setup
-TOKEN = '8675102863:AAHmwX0vYSYiG945LXfvx794isMPxRGCeNs'
+# Naya Revoked Token
+TOKEN = '8675102863:AAGdqko_nAL-GpVuOx2LRUw-LcqMp9z996o'
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
@@ -25,7 +25,7 @@ def send_welcome(message):
     welcome_text = (
         f"Salaam {user_name}! 🚀\n\n"
         "Main hu NexusDrop Engine.\n"
-        "Kisi bhi video ya reel ka link bhejo, direct video mil jayegi!"
+        "Kisi bhi video ya reel ka link bhejo, direct download karke bhej dunga bina ads ke."
     )
     bot.reply_to(message, welcome_text)
 
@@ -33,15 +33,15 @@ def send_welcome(message):
 def handle_link(message):
     url = message.text.strip()
     if not (url.startswith('http://') or url.startswith('https://')):
-        bot.reply_to(message, "Kripya valid video link bhejein.")
+        bot.reply_to(message, "Kripya ek valid video link bhejein.")
         return
 
-    status_msg = bot.reply_to(message, "⚡ Processing... Video download ho rahi hai.")
+    status_msg = bot.reply_to(message, "⚡ Processing shuru... Video extract ho rahi hai.")
 
     ydl_opts = {
         'format': 'best[ext=mp4]/best',
         'outtmpl': 'downloaded_video.%(ext)s',
-        'max_filesize': 50 * 1024 * 1024,
+        'max_filesize': 50 * 1024 * 1024,  # 50MB limit
         'quiet': True,
         'no_warnings': True,
     }
@@ -58,15 +58,5 @@ def handle_link(message):
 
         if os.path.exists(filename):
             os.remove(filename)
-        bot.delete_message(chat_id=message.chat.id, message_id=status_msg.message_id)
-
-    except Exception as e:
-        bot.edit_message_text("❌ Error aaya: Link support nahi kiya ya file 50MB se badi hai.", chat_id=message.chat.id, message_id=status_msg.message_id)
-
-if __name__ == '__main__':
-    # Start web server in background thread
-    t = threading.Thread(target=run_flask)
-    t.start()
-    
-    # Start bot polling
-    bot.infinity_polling()
+        bot.delete_message(chat_id=message
+        
