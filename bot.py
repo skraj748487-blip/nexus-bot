@@ -1,7 +1,21 @@
 import telebot
 import os
 import yt_dlp
+import threading
+from flask import Flask
 
+# Dummy web server for Render Free Web Service
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "NexusDrop is running 24/7!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+# Telegram Bot Setup
 TOKEN = '8675102863:AAHmwX0vYSYiG945LXfvx794isMPxRGCeNs'
 bot = telebot.TeleBot(TOKEN)
 
@@ -11,8 +25,7 @@ def send_welcome(message):
     welcome_text = (
         f"Salaam {user_name}! 🚀\n\n"
         "Main hu NexusDrop Engine.\n"
-        "Kisi bhi video ya reel ka link bhejo (YouTube, Instagram, etc.), "
-        "main direct media extract karke bhej dunga bina ads ke."
+        "Kisi bhi video ya reel ka link bhejo, direct video mil jayegi!"
     )
     bot.reply_to(message, welcome_text)
 
@@ -23,7 +36,7 @@ def handle_link(message):
         bot.reply_to(message, "Kripya valid video link bhejein.")
         return
 
-    status_msg = bot.reply_to(message, "⚡ Processing shuru... Video download ho rahi hai.")
+    status_msg = bot.reply_to(message, "⚡ Processing... Video download ho rahi hai.")
 
     ydl_opts = {
         'format': 'best[ext=mp4]/best',
@@ -48,7 +61,12 @@ def handle_link(message):
         bot.delete_message(chat_id=message.chat.id, message_id=status_msg.message_id)
 
     except Exception as e:
-        bot.edit_message_text("❌ Error aaya: File download nahi ho saki ya size 50MB se bada hai.", chat_id=message.chat.id, message_id=status_msg.message_id)
+        bot.edit_message_text("❌ Error aaya: Link support nahi kiya ya file 50MB se badi hai.", chat_id=message.chat.id, message_id=status_msg.message_id)
 
-print("NexusDrop Engine is LIVE and Running...")
-bot.infinity_polling()
+if __name__ == '__main__':
+    # Start web server in background thread
+    t = threading.Thread(target=run_flask)
+    t.start()
+    
+    # Start bot polling
+    bot.infinity_polling()
